@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: lightspeed-poc
+  labels:
+    name: lightspeed-poc
+    app: lightspeed-stack

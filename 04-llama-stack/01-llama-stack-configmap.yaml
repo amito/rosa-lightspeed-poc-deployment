@@ -1,0 +1,191 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama-stack-config
+  namespace: lightspeed-poc
+data:
+  run.yaml: |
+    version: 2
+    image_name: lightspeed-poc-llama-stack
+
+    apis:
+    - agents
+    - batches
+    - datasetio
+    - eval
+    - files
+    - inference
+    - safety
+    - scoring
+    - tool_runtime
+    - vector_io
+
+    benchmarks: []
+    conversations_store:
+      db_path: ~/.llama/storage/conversations.db
+      type: sqlite
+    datasets: []
+
+    inference_store:
+      db_path: ~/.llama/storage/inference-store.db
+      type: sqlite
+    metadata_store:
+      db_path: ~/.llama/storage/registry.db
+      type: sqlite
+
+    providers:
+      inference:
+      # vLLM provider pointing to the vLLM service
+      - provider_id: vllm
+        provider_type: remote::vllm
+        config:
+          # Using hardcoded base_url (some vLLM providers expect this field name)
+          base_url: http://vllm-llama-model-predictor.lightspeed-poc.svc.cluster.local:8080/v1
+          url: http://vllm-llama-model-predictor.lightspeed-poc.svc.cluster.local:8080/v1
+          api_token: ${env.VLLM_API_KEY}
+          tls_verify: false
+          max_tokens: 4096
+
+      # Sentence transformers for embeddings (used for RAG)
+      - config: {}
+        provider_id: sentence-transformers
+        provider_type: inline::sentence-transformers
+
+      files:
+      - config:
+          metadata_store:
+            table_name: files_metadata
+            backend: sql_default
+          storage_dir: ~/.llama/storage/files
+        provider_id: meta-reference-files
+        provider_type: inline::localfs
+
+      scoring:
+      - config: {}
+        provider_id: basic
+        provider_type: inline::basic
+
+      tool_runtime:
+      - config: {}
+        provider_id: rag-runtime
+        provider_type: inline::rag-runtime
+
+      vector_io:
+      - config:
+          persistence:
+            namespace: vector_io::faiss
+            backend: kv_default
+        provider_id: faiss
+        provider_type: inline::faiss
+
+      agents:
+      - config:
+          persistence:
+            agent_state:
+              namespace: agents_state
+              backend: kv_default
+            responses:
+              table_name: agents_responses
+              backend: sql_default
+        provider_id: meta-reference
+        provider_type: inline::meta-reference
+
+      batches:
+      - config:
+          kvstore:
+            namespace: batches_store
+            backend: kv_default
+        provider_id: reference
+        provider_type: inline::reference
+
+      datasetio:
+      - config:
+          kvstore:
+            namespace: huggingface_datasetio
+            backend: kv_default
+        provider_id: huggingface
+        provider_type: remote::huggingface
+      - config:
+          kvstore:
+            namespace: localfs_datasetio
+            backend: kv_default
+        provider_id: localfs
+        provider_type: inline::localfs
+
+      eval:
+      - config:
+          kvstore:
+            namespace: eval_store
+            backend: kv_default
+        provider_id: meta-reference
+        provider_type: inline::meta-reference
+
+    scoring_fns: []
+    server:
+      port: 8321
+
+    storage:
+      backends:
+        kv_default:
+          type: kv_sqlite
+          db_path: ${env.KV_STORE_PATH:=~/.llama/storage/rag/kv_store.db}
+        sql_default:
+          type: sql_sqlite
+          db_path: ${env.SQL_STORE_PATH:=~/.llama/storage/sql_store.db}
+      stores:
+        metadata:
+          namespace: registry
+          backend: kv_default
+        inference:
+          table_name: inference_store
+          backend: sql_default
+          max_write_queue_size: 10000
+          num_writers: 4
+        conversations:
+          table_name: openai_conversations
+          backend: sql_default
+        prompts:
+          namespace: prompts
+          backend: kv_default
+
+    registered_resources:
+      models:
+      # vLLM model for inference
+      - model_id: ${env.INFERENCE_MODEL}
+        provider_id: vllm
+        model_type: llm
+        provider_model_id: ${env.INFERENCE_MODEL}
+
+      # Embedding model for RAG
+      - model_id: nomic-ai/nomic-embed-text-v1.5
+        provider_id: sentence-transformers
+        model_type: embedding
+        provider_model_id: nomic-ai/nomic-embed-text-v1.5
+        metadata:
+          embedding_dimension: 768
+
+      shields: []
+
+      datasets: []
+      scoring_fns: []
+      benchmarks: []
+
+      tool_groups:
+      - toolgroup_id: builtin::rag
+        provider_id: rag-runtime
+
+      vector_dbs:
+      - vector_db_id: rhoai-docs
+        provider_id: faiss
+        embedding_model: nomic-ai/nomic-embed-text-v1.5
+        embedding_dimension: 768
+
+    # Vector store configuration for RAG
+    vector_stores:
+      default_provider_id: faiss
+      default_embedding_model:
+        provider_id: sentence-transformers
+        model_id: nomic-ai/nomic-embed-text-v1.5
+
+    telemetry:
+      enabled: true

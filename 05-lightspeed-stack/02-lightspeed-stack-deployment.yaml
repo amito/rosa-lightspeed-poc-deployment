@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lightspeed-stack
+  namespace: lightspeed-poc
+  labels:
+    app: lightspeed-stack
+    component: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lightspeed-stack
+      component: api
+  template:
+    metadata:
+      labels:
+        app: lightspeed-stack
+        component: api
+    spec:
+      containers:
+        - name: lightspeed-stack-container
+          image: quay.io/rh-ee-amoren/lightspeed-stack:timeout-fix
+          ports:
+            - containerPort: 8080
+              name: http
+              protocol: TCP
+          volumeMounts:
+            - name: config
+              mountPath: /app-root/lightspeed-stack.yaml
+              subPath: lightspeed-stack.yaml
+            - name: feedback-storage
+              mountPath: /tmp/data/feedback
+            - name: transcripts-storage
+              mountPath: /tmp/data/transcripts
+          resources:
+            requests:
+              memory: "1Gi"
+              cpu: "500m"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+          livenessProbe:
+            httpGet:
+              path: /liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readiness
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+      volumes:
+        - name: config
+          configMap:
+            name: lightspeed-stack-config
+        - name: feedback-storage
+          emptyDir: {}
+        - name: transcripts-storage
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lightspeed-stack-service
+  namespace: lightspeed-poc
+  labels:
+    app: lightspeed-stack
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: http
+  selector:
+    app: lightspeed-stack
+    component: api
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: lightspeed-stack
+  namespace: lightspeed-poc
+  labels:
+    app: lightspeed-stack
+  annotations:
+    haproxy.router.openshift.io/timeout: 210s
+spec:
+  to:
+    kind: Service
+    name: lightspeed-stack-service
+  port:
+    targetPort: http
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

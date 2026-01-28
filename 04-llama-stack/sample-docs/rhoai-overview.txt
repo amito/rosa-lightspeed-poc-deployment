@@ -1,0 +1,96 @@
+Red Hat OpenShift AI Overview
+
+Red Hat OpenShift AI is a comprehensive AI/ML platform that helps data scientists and developers build, deploy, and manage AI-enabled applications at scale. It provides an integrated environment for the entire machine learning lifecycle.
+
+Key Features:
+
+1. Jupyter Notebooks
+   - Interactive development environment for data scientists
+   - Pre-configured with popular ML libraries and frameworks
+   - Supports Python, R, and other languages
+   - GPU-accelerated compute options available
+
+2. Model Serving
+   - Deploy models as REST APIs
+   - Supports multiple frameworks: TensorFlow, PyTorch, scikit-learn
+   - Auto-scaling based on load
+   - A/B testing and canary deployments
+   - Integration with KServe for advanced serving capabilities
+
+3. Pipeline Automation
+   - Build and orchestrate ML workflows
+   - Kubeflow Pipelines integration
+   - Automated model training and deployment
+   - Version control for models and datasets
+
+4. GPU Support
+   - NVIDIA GPU acceleration for training
+   - Optimized for deep learning workloads
+   - Support for distributed training
+   - GPU sharing and scheduling
+
+5. Model Monitoring
+   - Track model performance over time
+   - Detect model drift
+   - Monitor prediction quality
+   - Integration with OpenShift monitoring stack
+
+6. Data Science Projects
+   - Organize work into logical projects
+   - Share resources across team members
+   - Role-based access control
+   - Integration with OpenShift projects
+
+Getting Started with RHOAI:
+
+1. Install the Red Hat OpenShift AI operator from the OperatorHub
+2. Create a DataScienceCluster resource
+3. Access the dashboard through the OpenShift console
+4. Create a data science project
+5. Launch a Jupyter notebook
+6. Start building your models
+
+Common Use Cases:
+
+- Computer Vision: Image classification, object detection
+- Natural Language Processing: Text analysis, sentiment analysis
+- Predictive Analytics: Forecasting, anomaly detection
+- Recommendation Systems: Product recommendations, content filtering
+- Time Series Analysis: Trend prediction, pattern recognition
+
+Inference and Model Deployment:
+
+RHOAI provides several options for deploying trained models:
+
+1. Single Model Serving: Deploy individual models with custom runtime
+2. Multi-Model Serving: Serve multiple models from a single endpoint
+3. Batch Inference: Process large datasets offline
+4. Real-time Inference: Low-latency predictions for production applications
+
+Integration with vLLM:
+
+vLLM (Versatile Large Language Model) is a high-performance inference engine optimized for large language models. RHOAI integrates with vLLM to provide:
+
+- Fast inference for transformer models
+- Efficient GPU utilization
+- Support for popular LLMs like Llama, Mistral, GPT
+- Tool calling and function calling capabilities
+- JSON mode for structured outputs
+
+Best Practices:
+
+1. Use GPU instances for training deep learning models
+2. Implement model versioning from day one
+3. Monitor resource usage to optimize costs
+4. Use pipelines for reproducible workflows
+5. Implement proper data governance and security
+6. Regular model retraining to prevent drift
+7. Use appropriate hardware for your workload (CPU vs GPU)
+
+Troubleshooting:
+
+- Check pod logs for errors: oc logs <pod-name>
+- Verify GPU allocation: oc describe node <node-name>
+- Review operator status: oc get csv -n redhat-ods-operator
+- Check data science cluster: oc get datasciencecluster
+- Monitor resource quotas in your namespace

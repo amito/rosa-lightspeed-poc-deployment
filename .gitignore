@@ -1,0 +1,28 @@
+# OpenShift / Kubernetes
+*.swp
+*~
+.DS_Store
+
+# Secrets and credentials
+**/hf-token-secret.yaml
+**/vllm-api-key-secret.yaml
+**/*secret*.yaml
+!*-secret-template.yaml
+
+# Local development
+.env
+.env.local
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Generated files
+chat-template.jinja

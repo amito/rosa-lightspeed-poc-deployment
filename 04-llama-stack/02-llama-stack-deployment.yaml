@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-stack
+  namespace: lightspeed-poc
+  labels:
+    app: llama-stack
+    component: middleware
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llama-stack
+      component: middleware
+  template:
+    metadata:
+      labels:
+        app: llama-stack
+        component: middleware
+    spec:
+      containers:
+        - name: llama-stack-container
+          image: quay.io/aipcc/llama-stack/cpu-ubi9:rhoai-3.2
+          ports:
+            - containerPort: 8321
+              name: http
+              protocol: TCP
+          env:
+            # vLLM service URL will be set from a secret (created after vLLM deployment)
+            - name: VLLM_SERVICE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: vllm-service-url
+                  key: url
+            - name: VLLM_URL
+              value: http://vllm-llama-model-predictor.lightspeed-poc.svc.cluster.local:8080/v1/
+            - name: VLLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vllm-api-key-secret
+                  key: key
+            # Model configuration
+            - name: INFERENCE_MODEL
+              value: Qwen/Qwen2.5-3B-Instruct
+            # Storage paths
+            - name: KV_STORE_PATH
+              value: /opt/app-root/src/.llama/storage/rag/kv_store.db
+            - name: SQL_STORE_PATH
+              value: /opt/app-root/src/.llama/storage/sql_store.db
+            # HuggingFace cache directory
+            - name: HF_HOME
+              value: /opt/app-root/src/.cache/huggingface
+            - name: TRANSFORMERS_CACHE
+              value: /opt/app-root/src/.cache/huggingface
+          volumeMounts:
+            - name: app-root
+              mountPath: /opt/app-root/src/.llama
+            - name: hf-cache
+              mountPath: /opt/app-root/src/.cache
+            - name: config
+              mountPath: /opt/app-root/run.yaml
+              subPath: run.yaml
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
+      volumes:
+        - name: app-root
+          emptyDir: {}
+        - name: hf-cache
+          emptyDir: {}
+        - name: config
+          configMap:
+            name: llama-stack-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama-stack-service
+  namespace: lightspeed-poc
+  labels:
+    app: llama-stack
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8321
+      targetPort: 8321
+      protocol: TCP
+      name: http
+  selector:
+    app: llama-stack
+    component: middleware
