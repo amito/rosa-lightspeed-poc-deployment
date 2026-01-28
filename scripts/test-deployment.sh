@@ -84,8 +84,8 @@ echo ""
 echo "Test 4: Basic Query (No RAG)"
 echo "-----------------------------"
 
-print_test "Sending basic query (may take up to 3 minutes)..."
-query_response=$(curl -sk --max-time 200 -X POST "https://${LIGHTSPEED_URL}/v1/query" \
+print_test "Sending basic query (should complete in ~30s with 0.5B model)..."
+query_response=$(curl -sk --max-time 80 -X POST "https://${LIGHTSPEED_URL}/v1/query" \
     -H "Content-Type: application/json" \
     -d '{"query": "What is Kubernetes in one sentence?", "system_prompt": "You are a helpful assistant. Answer concisely in one sentence.", "no_tools": true}')
 
@@ -107,10 +107,10 @@ echo ""
 echo "Test 5: RAG Query (Knowledge Search)"
 echo "-------------------------------------"
 
-print_test "Sending RAG query about RHOAI (may take up to 3 minutes)..."
+print_test "Sending RAG query about RHOAI (should complete in ~30-60s with 0.5B model)..."
 rag_query='What are the key features of Red Hat OpenShift AI?'
 
-rag_response=$(curl -sk --max-time 200 -X POST "https://${LIGHTSPEED_URL}/v1/query" \
+rag_response=$(curl -sk --max-time 80 -X POST "https://${LIGHTSPEED_URL}/v1/query" \
     -H "Content-Type: application/json" \
     -d "{\"query\": \"$rag_query\", \"no_tools\": false}")
 
@@ -140,7 +140,7 @@ echo "Test 6: Streaming Query"
 echo "-----------------------"
 
 print_test "Testing streaming endpoint..."
-stream_response=$(curl -sk --max-time 200 -X POST "https://${LIGHTSPEED_URL}/v1/streaming_query" \
+stream_response=$(curl -sk --max-time 80 -X POST "https://${LIGHTSPEED_URL}/v1/streaming_query" \
     -H "Content-Type: application/json" \
     -d '{"query": "List three benefits of using Red Hat OpenShift AI", "no_tools": false}' 2>/dev/null | head -n 20)
 

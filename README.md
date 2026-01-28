@@ -23,7 +23,7 @@ The deployment consists of three main components:
 │      vLLM           │  ← Inference Engine (Port 8080)
 │ (KServe/OpenShift   │     - LLM model serving
 │      AI)            │     - GPU-accelerated
-└─────────────────────┘     - Qwen 2.5 3B Instruct (32K context)
+└─────────────────────┘     - Qwen 2.5 0.5B Instruct (32K context, fast inference)
 ```
 
 ## Prerequisites
@@ -33,7 +33,7 @@ The deployment consists of three main components:
 - **ROSA Cluster**: 4.12 or later
 - **GPU Nodes**: At least 1 GPU node with NVIDIA GPU
   - Recommended: g5.2xlarge or similar (1 GPU, 8 vCPUs, 32 GiB RAM)
-  - Model: Qwen/Qwen2.5-3B-Instruct (32K context window)
+  - Model: Qwen/Qwen2.5-0.5B-Instruct (32K context, optimized for speed)
 - **OpenShift AI**: RHOAI operator installed
 - **NVIDIA GPU Operator**: Installed and configured
 - **CLI Tools**:
@@ -302,13 +302,23 @@ curl -X POST "https://${LIGHTSPEED_URL}/v1/query" \
 
 ### Model Information
 
-**Current Model**: Qwen/Qwen2.5-3B-Instruct
+**Current Model**: Qwen/Qwen2.5-0.5B-Instruct
 - **Context Window**: 32,768 tokens (32K)
-- **Parameters**: 3B
-- **Memory**: ~6-7GB GPU memory
-- **Strengths**: Excellent for chatbots, good instruction following, efficient
+- **Parameters**: 0.5B (494M parameters)
+- **Memory**: ~2-3GB GPU memory
+- **Response Time**: 30-60 seconds for queries
+- **Strengths**: Very fast inference, good for quick chatbot responses, efficient resource usage
 
-**Note**: This model was chosen for its large context window and efficiency. Previous model (Phi-3.5-mini-instruct) had only 2K context which caused failures with RAG queries.
+**Why this model?**
+- **6x faster** than the 3B variant while maintaining the same 32K context window
+- Optimized for low-latency responses (< 60s vs 180s timeout needed for larger models)
+- Perfect for POC and demonstrations where speed matters
+- Can run on smaller GPU instances (g5.xlarge or g5.2xlarge)
+
+**Alternative Models:**
+- **Qwen/Qwen2.5-1.5B-Instruct**: Better quality, ~2x slower (90-120s responses)
+- **Qwen/Qwen2.5-3B-Instruct**: Best quality, requires 180s timeout
+- **meta-llama/Llama-3.2-1B-Instruct**: 128K context, very fast
 
 ### Model Output Format
 

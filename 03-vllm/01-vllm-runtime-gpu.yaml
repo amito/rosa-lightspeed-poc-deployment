@@ -13,7 +13,7 @@ spec:
   containers:
     - args:
         - --model
-        - Qwen/Qwen2.5-3B-Instruct
+        - Qwen/Qwen2.5-0.5B-Instruct
         - --enable-auto-tool-choice
         - --tool-call-parser
         - llama3_json

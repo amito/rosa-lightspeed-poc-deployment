@@ -41,7 +41,7 @@ spec:
                   key: key
             # Model configuration
             - name: INFERENCE_MODEL
-              value: Qwen/Qwen2.5-3B-Instruct
+              value: Qwen/Qwen2.5-0.5B-Instruct
             # Storage paths
             - name: KV_STORE_PATH
               value: /opt/app-root/src/.llama/storage/rag/kv_store.db
