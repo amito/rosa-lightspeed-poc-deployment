@@ -26,7 +26,6 @@ data:
       use_as_library_client: false
       url: http://llama-stack-service.lightspeed-poc.svc.cluster.local:8321
       api_key: xyzzy
-      timeout: 60  # Faster model (Qwen2.5-0.5B) should respond within 60 seconds
 
     user_data_collection:
       feedback_enabled: true

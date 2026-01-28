@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: lightspeed-stack-container
-          image: quay.io/rh-ee-amoren/lightspeed-stack:timeout-fix
+          image: quay.io/lightspeed-core/lightspeed-stack:latest
           ports:
             - containerPort: 8080
               name: http

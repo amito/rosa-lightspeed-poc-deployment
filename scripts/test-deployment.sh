@@ -139,8 +139,8 @@ echo ""
 echo "Test 6: Streaming Query"
 echo "-----------------------"
 
-print_test "Testing streaming endpoint..."
-stream_response=$(curl -sk --max-time 80 -X POST "https://${LIGHTSPEED_URL}/v1/streaming_query" \
+print_test "Testing streaming endpoint (may take up to 2 minutes with RAG)..."
+stream_response=$(curl -sk --max-time 120 -X POST "https://${LIGHTSPEED_URL}/v1/streaming_query" \
     -H "Content-Type: application/json" \
     -d '{"query": "List three benefits of using Red Hat OpenShift AI", "no_tools": false}' 2>/dev/null | head -n 20)
 
