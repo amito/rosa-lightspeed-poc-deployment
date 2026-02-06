@@ -27,6 +27,10 @@ data:
       url: http://llama-stack-service.lightspeed-poc.svc.cluster.local:8321
       api_key: xyzzy
 
+    mcp_servers:
+      - name: "rhoai-mcp"
+        url: "http://rhoai-mcp.lightspeed-poc.svc.cluster.local:8000"
+
     user_data_collection:
       feedback_enabled: true
       feedback_storage: "/tmp/data/feedback"
