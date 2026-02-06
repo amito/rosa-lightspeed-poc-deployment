@@ -69,6 +69,8 @@ data:
       - config: {}
         provider_id: rag-runtime
         provider_type: inline::rag-runtime
+      - provider_id: model-context-protocol
+        provider_type: remote::model-context-protocol
 
       vector_io:
       - config:
