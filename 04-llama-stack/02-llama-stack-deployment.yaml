@@ -20,12 +20,18 @@ spec:
     spec:
       containers:
         - name: llama-stack-container
-          image: quay.io/aipcc/llama-stack/cpu-ubi9:rhoai-3.2
+          image: llamastack/distribution-starter-gpu:0.4.3
+          command: ["llama", "stack", "run", "/opt/app-root/run.yaml"]
           ports:
             - containerPort: 8321
               name: http
               protocol: TCP
           env:
+            # Llama Stack home directory (prevents permission errors on /.llama)
+            - name: LLAMA_STACK_DIR
+              value: /opt/app-root/src/.llama
+            - name: HOME
+              value: /opt/app-root/src
             # vLLM service URL will be set from a secret (created after vLLM deployment)
             - name: VLLM_SERVICE_URL
               valueFrom:
@@ -35,6 +41,11 @@ spec:
             - name: VLLM_URL
               value: http://vllm-llama-model-predictor.lightspeed-poc.svc.cluster.local:8080/v1/
             - name: VLLM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vllm-api-key-secret
+                  key: key
+            - name: VLLM_API_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: vllm-api-key-secret
