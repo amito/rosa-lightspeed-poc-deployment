@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: lightspeed-stack-container
-          image: quay.io/lightspeed-core/lightspeed-stack:latest
+          image: quay.io/lightspeed-core/lightspeed-stack:0.4.1
           ports:
             - containerPort: 8080
               name: http
